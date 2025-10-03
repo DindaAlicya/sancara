@@ -19,8 +19,8 @@ GEMINI_MODEL = "gemini-2.5-flash"
 
 @st.cache_resource
 def load_model():
-    model_alphabet = joblib.load("Model/gesture_model_alphabet.pkl")
-    le_alphabet = joblib.load("Model/label_encoder_alphabet.pkl")
+    model_alphabet = joblib.load("gesture_model_alphabet.pkl")
+    le_alphabet = joblib.load("label_encoder_alphabet.pkl")
     return model_alphabet, le_alphabet
 
 model, label_encoder = load_model()
