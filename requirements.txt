@@ -15,7 +15,7 @@ matplotlib==3.7.2
 # Computer Vision
 opencv-python-headless==4.8.1.78
 mediapipe==0.10.13
-protobuf==4.24.0
+protobuf
 
 # Audio / Speech
 gTTS==2.5.4
@@ -27,3 +27,4 @@ toml==0.10.2
 
 # Google Generative AI
 google-generativeai==0.8.5
+
