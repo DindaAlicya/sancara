@@ -230,5 +230,3 @@ elif mode == "Speech to Text":
                 st.error(f"Error service: {e}")
             except Exception as e:
                 st.error(f"Error: {e}")
-
-tolong terapin ke codingan ini
