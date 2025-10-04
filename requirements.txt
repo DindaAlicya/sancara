@@ -13,7 +13,7 @@ joblib==1.5.2
 matplotlib==3.7.2
 
 # Computer Vision
-opencv-python-headless==4.10.0.84
+opencv-python-headless==4.10.0.78
 mediapipe==0.10.13
 protobuf
 
@@ -27,5 +27,6 @@ toml==0.10.2
 
 # Google Generative AI
 google-generativeai==0.8.5
+
 
 
