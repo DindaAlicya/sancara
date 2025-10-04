@@ -2,7 +2,7 @@
 gTTS==2.5.4
 joblib==1.5.2
 matplotlib==3.10.0
-mediapipe
+mediapipe==0.10.13
 ml_dtypes==0.5.3
 numpy==2.0.2
 opencv-python-headless
@@ -17,6 +17,7 @@ streamlit-webrtc==0.63.5
 toml==0.10.2
 
 tqdm==4.67.1
+
 
 
 
