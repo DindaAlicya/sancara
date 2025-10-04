@@ -124,69 +124,38 @@ st.title("🤟🗣️ Sancara - Sign Language & Speech Translator")
 # Pilihan mode
 mode = st.radio("Pilih Mode Translator  :", ["Bahasa Isyarat", "Speech to Text"])
 
-IS_CLOUD = os.getenv("STREAMLIT_RUNTIME") is not None
-
 if mode == "Bahasa Isyarat":
     col1, col2 = st.columns([2, 1])
 
-    if IS_CLOUD:
-        st.warning("⚠️ Mode kamera tidak tersedia di Streamlit Cloud.\n"
-                   "Silakan gunakan aplikasi ini secara **lokal** untuk deteksi real-time.\n"
-                   "Namun, kamu masih bisa **unggah gambar gesture** untuk diuji di sini.")
-        
-        uploaded_file = st.file_uploader("📸 Unggah gambar tangan", type=["jpg", "png", "jpeg"])
-        if uploaded_file is not None:
-            file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
-            img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
-            img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            results = mp_hands.Hands(static_image_mode=True).process(img_rgb)
+    with col1:
+        ctx = webrtc_streamer(
+            key="sancara",
+            mode=WebRtcMode.SENDRECV,
+            video_processor_factory=SignLanguageProcessor,
+            media_stream_constraints={"video": {"width": 640, "height": 480}, "audio": False},
+        )
 
-            if results.multi_hand_landmarks:
-                for hand_landmarks in results.multi_hand_landmarks:
-                    mp_drawing.draw_landmarks(img, hand_landmarks, mp_hands.HAND_CONNECTIONS)
-                    features = [v for lm in hand_landmarks.landmark for v in (lm.x, lm.y, lm.z)]
-                    features_np = np.array(features).reshape(1, -1)
-                    pred = model.predict(features_np)
-                    label = label_encoder.inverse_transform(pred)[0]
-                    st.success(f"Huruf terdeteksi: **{label}**")
-                    st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-            else:
-                st.error("Tidak ada tangan terdeteksi di gambar.")
-    
-    else:
-        with col1:
-            ctx = webrtc_streamer(
-                key="sancara",
-                mode=WebRtcMode.SENDRECV,
-                video_processor_factory=SignLanguageProcessor,
-                media_stream_constraints={"video": {"width": 640, "height": 480}, "audio": False},
-            )
+    with col2:
+        st.subheader("Catatan Prediksi")
+        note_text = ""
+        if ctx and ctx.video_processor:
+            note_text = ctx.video_processor.note
+        st.text_area("Hasil Deteksi", note_text, height=300, key="note_area")
 
-        with col2:
-            st.subheader("Catatan Prediksi")
-            note_text = ""
-            if ctx and ctx.video_processor:
-                note_text = ctx.video_processor.note
-            st.text_area("Hasil Deteksi", note_text, height=300, key="note_area")
+        if st.button("Play (Read) & Reset (R)", key="play_reset_btn"):
+            current_note = ctx.video_processor.note if ctx and ctx.video_processor else ""
 
-            if st.button("Play (Read) & Reset (R)", key="play_reset_btn"):
-                current_note = ctx.video_processor.note if ctx and ctx.video_processor else ""
+            if current_note:
+                kalimat_rapih = cleanup_with_gemini(current_note)
+                st.success(f"Kalimat rapih: {kalimat_rapih}")
 
-                if current_note:
-                    kalimat_rapih = cleanup_with_gemini(current_note)
-                    st.success(f"Kalimat rapih: {kalimat_rapih}")
-
-                    try:
-                        tts = gTTS(text=kalimat_rapih, lang="id")
-                        tmpfile = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
-                        tts.save(tmpfile.name)
-                        st.audio(tmpfile.name)
-                    except Exception as e:
-                        st.error(f"TTS error: {e}")
-
-                if ctx and ctx.video_processor:
-                    ctx.video_processor.reset()
-
+                try:
+                    tts = gTTS(text=kalimat_rapih, lang="id")
+                    tmpfile = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+                    tts.save(tmpfile.name)
+                    st.audio(tmpfile.name)
+                except Exception as e:
+                    st.error(f"TTS error: {e}")
 
             key_pressed = streamlit_js_eval(
                 js_expressions="document.addEventListener('keydown', e => e.key)",
@@ -261,3 +230,5 @@ elif mode == "Speech to Text":
                 st.error(f"Error service: {e}")
             except Exception as e:
                 st.error(f"Error: {e}")
+
+tolong terapin ke codingan ini
